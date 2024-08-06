@@ -7,12 +7,7 @@ export const addVideo = async (req, res, next) => {
 
     try {
 
-        const newVideo = new Video({
-
-            ...req.body,
-            userId: req.user.id
-
-        })
+        const newVideo = new Video({ ...req.body, userId: req.user.id })
 
         const savedVideo = await newVideo.save()
 
@@ -33,22 +28,15 @@ export const updateVideo = async (req, res, next) => {
 
         const video = await Video.findById(req.params.id)
 
-        if (!video)
+        if (!video) {
+
             return next(createError(404, "Không tìm thấy video"))
+
+        }
 
         if (req.user.id === video.userId) {
 
-            const updatedVideo = await Video.findByIdAndUpdate(
-
-                req.params.id,
-                {
-                    $set: req.body
-                },
-                {
-                    new: true
-                },
-
-            )
+            const updatedVideo = await Video.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
 
             res.status(200).json(updatedVideo)
 
@@ -74,8 +62,11 @@ export const deleteVideo = async (req, res, next) => {
 
         const video = await Video.findById(req.params.id)
 
-        if (!video)
+        if (!video) {
+
             return next(createError(404, "Không tìm thấy video"))
+
+        }
 
         if (req.user.id === video.userId) {
 
@@ -88,7 +79,6 @@ export const deleteVideo = async (req, res, next) => {
             next(createError(401, "Bạn chỉ có thể xóa video của bạn"))
 
         }
-
 
     } catch (err) {
 
@@ -120,15 +110,7 @@ export const addView = async (req, res, next) => {
 
     try {
 
-        await Video.findByIdAndUpdate(
-
-            req.params.videoId,
-            {
-                $inc: {
-                    views: 1
-                },
-            },
-        )
+        await Video.findByIdAndUpdate(req.params.videoId, { $inc: { views: 1 } })
 
         res.status(200).json("Lượt xem đã được tăng lên")
 
@@ -145,13 +127,7 @@ export const trend = async (req, res, next) => {
 
     try {
 
-        const videos = await Video.find().sort(
-
-            {
-                views: -1
-            },
-
-        )
+        const videos = await Video.find().sort({ views: -1 })
 
         res.status(200).json(videos)
 
@@ -168,16 +144,7 @@ export const random = async (req, res, next) => {
 
     try {
 
-        const videos = await Video.aggregate([
-
-            {
-                $sample: {
-                    size: 30
-                },
-            },
-        ]
-
-        )
+        const videos = await Video.aggregate([{ $sample: { size: 30 } }])
 
         res.status(200).json(videos)
 
@@ -202,13 +169,7 @@ export const sub = async (req, res, next) => {
 
             subscribeChannels.map(async (channelId) => {
 
-                return await Video.find(
-
-                    {
-                        userId: channelId
-                    },
-
-                )
+                return await Video.find({ userId: channelId })
 
             })
 
@@ -231,15 +192,7 @@ export const getByTags = async (req, res, next) => {
 
         const tags = req.query.tags.split(",")
 
-        const videos = await Video.find(
-
-            {
-                tags: {
-                    $in: tags
-                },
-            },
-
-        ).limit(20)
+        const videos = await Video.find({ tags: { $in: tags } }).limit(20)
 
         res.status(200).json(videos)
 
@@ -258,16 +211,7 @@ export const search = async (req, res, next) => {
 
         const query = req.query.q
 
-        const videos = await Video.find(
-
-            {
-                title: {
-                    $regex: query,
-                    $options: "i"
-                },
-            },
-
-        ).limit(40)
+        const videos = await Video.find({ title: { $regex: query, $options: "i" } }).limit(40)
 
         res.status(200).json(videos)
 

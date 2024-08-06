@@ -15,7 +15,6 @@ dotenv.config()
 const port = process.env.PORT || 9000
 
 // Connect to MongoDB
-
 const connect = async () => {
 
     try {

@@ -8,12 +8,10 @@ export const register = async (req, res, next) => {
     try {
 
         const salt = bcrypt.genSaltSync(10)
+
         const hashedPassword = bcrypt.hashSync(req.body.password, salt)
 
-        const newUser = new User({
-            ...req.body,
-            password: hashedPassword
-        })
+        const newUser = new User({ ...req.body, password: hashedPassword })
 
         await newUser.save()
 
@@ -32,19 +30,21 @@ export const login = async (req, res) => {
 
     try {
 
-        const user = await User.findOne({
+        const user = await User.findOne({ name: req.body.name })
 
-            name: req.body.name
+        if (!user) {
 
-        })
-
-        if (!user)
             return next(createError(404, "Thông tin tài khoản hoặc mật khẩu không chính xác"))
+
+        }
 
         const isCorrectPassword = bcrypt.compare(req.body.password, user.password)
 
-        if (!isCorrectPassword)
+        if (!isCorrectPassword) {
+
             return next(createError(404, "Thông tin tài khoản hoặc mật khẩu không chính xác"))
+
+        }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT)
 
@@ -65,11 +65,7 @@ export const googleAuth = async (req, res, next) => {
 
     try {
 
-        const user = await User.findOne({
-
-            email: req.body.email,
-
-        })
+        const user = await User.findOne({ email: req.body.email })
 
         if (user) {
 
@@ -79,12 +75,7 @@ export const googleAuth = async (req, res, next) => {
 
         } else {
 
-            const newUser = new User({
-
-                ...req.body,
-                fromGoogle: true
-
-            })
+            const newUser = new User({ ...req.body, fromGoogle: tru })
 
             const savedUser = await newUser.save()
 

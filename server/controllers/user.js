@@ -10,17 +10,7 @@ export const updateUser = async (req, res, next) => {
 
             const userId = req.params.id
 
-            const updatedUser = await User.findByIdAndUpdate(
-
-                userId,
-                {
-                    $set: req.body
-                },
-                {
-                    new: true
-                },
-
-            )
+            const updatedUser = await User.findByIdAndUpdate(userId, { $set: req.body }, { new: true })
 
             const { password, ...others } = updatedUser._doc
 
@@ -90,26 +80,9 @@ export const subscribe = async (req, res, next) => {
 
     try {
 
-        await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(req.user.id, { $addToSet: { subscribedUsers: req.params.id } })
 
-            req.user.id,
-            {
-                $addToSet: {
-                    subscribedUsers: req.params.id
-                }
-            }
-        )
-
-        await User.findByIdAndUpdate(
-
-            req.params.id,
-            {
-                $inc: {
-                    subscribers: 1
-                },
-            },
-
-        )
+        await User.findByIdAndUpdate(req.params.id, { $inc: { subscribers: 1 } })
 
         res.status(200).json("Đăng ký thành công")
 
@@ -125,27 +98,9 @@ export const unSubscribe = async (req, res, next) => {
 
     try {
 
-        await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(req.user.id, { $pull: { subscribedUsers: req.params.id } })
 
-            req.user.id,
-            {
-                $pull: {
-                    subscribedUsers: req.params.id
-                },
-            },
-
-        )
-
-        await User.findByIdAndUpdate(
-
-            req.params.id,
-            {
-                $inc: {
-                    subscribers: -1
-                },
-            },
-
-        )
+        await User.findByIdAndUpdate(req.params.id, { $inc: { subscribers: -1 } })
 
         res.status(200).json("Hủy đăng ký thành công")
 
@@ -155,7 +110,6 @@ export const unSubscribe = async (req, res, next) => {
 
     }
 
-
 }
 
 export const like = async (req, res, next) => {
@@ -163,22 +117,10 @@ export const like = async (req, res, next) => {
     try {
 
         const id = req.user.id
+
         const videoId = req.params.videoId
 
-        await Video.findByIdAndUpdate(
-
-            videoId,
-            {
-                $addToSet: {
-                    like: id
-                },
-
-                $pull: {
-                    dislike: id
-                },
-            },
-
-        )
+        await Video.findByIdAndUpdate(videoId, { $addToSet: { like: id }, $pull: { dislike: id } })
 
         res.status(200).json("Video vừa được thích")
 
@@ -194,22 +136,10 @@ export const disLike = async (req, res, next) => {
     try {
 
         const id = req.user.id
+
         const videoId = req.params.videoId
 
-        await Video.findByIdAndUpdate(
-
-            videoId,
-            {
-                $addToSet: {
-                    dislike: id
-                },
-
-                $pull: {
-                    like: id
-                },
-            },
-
-        )
+        await Video.findByIdAndUpdate(videoId, { $addToSet: { dislike: id }, $pull: { like: id } })
 
         res.status(200).json("Video vừa được bỏ thích")
 
